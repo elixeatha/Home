@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Our Home</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>🏡 Our Home</h1>
+      <div class="profile-bar" id="profile-bar"></div>
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="home">Home</button>
+        <button class="tab-btn" data-tab="improvement">Home Improvement</button>
+      </nav>
+    </header>
+
+    <main class="app-main">
+      <!-- HOME TAB -->
+      <section id="tab-home" class="tab-panel active">
+
+        <section class="card">
+          <h2>Shopping List</h2>
+          <form id="shopping-form" class="inline-form">
+            <input type="text" id="shopping-input" placeholder="Add an item…" autocomplete="off" required />
+            <button type="submit">Add</button>
+          </form>
+          <ul id="shopping-list" class="shopping-list"></ul>
+          <p id="shopping-empty" class="empty-hint" hidden>Nothing on the list — nice one 🎉</p>
+        </section>
+
+        <section class="card">
+          <h2>Bins</h2>
+          <div class="counter-grid" id="bins-grid"></div>
+        </section>
+
+        <section class="card">
+          <h2>Laundry</h2>
+          <div class="counter-grid" id="laundry-grid"></div>
+        </section>
+
+      </section>
+
+      <!-- HOME IMPROVEMENT TAB -->
+      <section id="tab-improvement" class="tab-panel">
+        <section class="card">
+          <h2>Home Improvement</h2>
+          <form id="improvement-form" class="stacked-form">
+            <input type="text" id="improvement-title" placeholder="What needs doing? e.g. Repaint hallway" autocomplete="off" required />
+            <textarea id="improvement-notes" placeholder="Notes (optional)" rows="2"></textarea>
+            <button type="submit">Add task</button>
+          </form>
+
+          <div id="improvement-list" class="improvement-list"></div>
+          <p id="improvement-empty" class="empty-hint" hidden>No projects yet — add your first one above.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Bin action sheet -->
+  <div id="bin-sheet-backdrop" class="sheet-backdrop" hidden>
+    <div class="sheet">
+      <h3 id="bin-sheet-title">Bin</h3>
+      <p id="bin-sheet-sub" class="sheet-sub"></p>
+      <button id="bin-sheet-empty" class="btn-primary">Empty bin</button>
+      <button id="bin-sheet-cancel" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Who are you? sheet -->
+  <div id="who-sheet-backdrop" class="sheet-backdrop" hidden>
+    <div class="sheet">
+      <h3>Who's using the app?</h3>
+      <p class="sheet-sub">Pick a profile — you can switch anytime by tapping the other avatar.</p>
+      <div class="who-grid" id="who-grid"></div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
