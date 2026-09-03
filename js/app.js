@@ -3,6 +3,37 @@
 
   const STORAGE_KEY = "ourhome-data-v1";
 
+  const PROFILES = {
+    jennie: {
+      name: "Jennie",
+      svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="54" r="34" fill="#241f1f"/>
+        <circle cx="50" cy="58" r="28" fill="#f6cba3"/>
+        <path d="M22,48 Q22,26 50,26 Q78,26 78,48 L78,44 Q78,30 50,30 Q22,30 22,44 Z" fill="#241f1f"/>
+        <path d="M20,44 Q17,68 25,88 L34,88 Q28,66 30,45 Z" fill="#241f1f"/>
+        <path d="M80,44 Q83,68 75,88 L66,88 Q72,66 70,45 Z" fill="#241f1f"/>
+        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#5b3a29"/>
+        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#5b3a29"/>
+        <path d="M42,73 Q50,79 58,73" stroke="#8a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
+        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
+      </svg>`,
+    },
+    will: {
+      name: "Will",
+      svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="58" r="28" fill="#fbe0c2"/>
+        <path d="M20,52 Q17,23 50,21 Q83,23 80,52 Q78,33 66,29 Q58,36 50,29 Q42,36 34,29 Q22,33 20,52 Z" fill="#6b4226"/>
+        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
+        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
+        <path d="M42,73 Q50,79 58,73" stroke="#c17a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
+        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
+      </svg>`,
+    },
+  };
+  const PROFILE_IDS = Object.keys(PROFILES);
+
   const COUNTERS = [
     { id: "binRecycling", group: "bins", icon: "♻️", label: "Recycling" },
     { id: "binGeneral", group: "bins", icon: "🗑️", label: "General" },
@@ -37,6 +68,11 @@
         data.counters[c.id] = { lastEmptied: todayStr() };
       }
     }
+    if (!data.points || typeof data.points !== "object") data.points = {};
+    for (const id of PROFILE_IDS) {
+      if (typeof data.points[id] !== "number") data.points[id] = 0;
+    }
+    if (!PROFILE_IDS.includes(data.currentUser)) data.currentUser = null;
     return data;
   }
 
@@ -48,6 +84,103 @@
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---------- Profiles & points ----------
+  const profileBarEl = document.getElementById("profile-bar");
+  const whoSheetBackdrop = document.getElementById("who-sheet-backdrop");
+  const whoGridEl = document.getElementById("who-grid");
+
+  function renderProfileBar() {
+    profileBarEl.innerHTML = "";
+    for (const id of PROFILE_IDS) {
+      const profile = PROFILES[id];
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `profile-card${state.currentUser === id ? " active" : ""}`;
+      card.dataset.profileId = id;
+
+      const avatarWrap = document.createElement("div");
+      avatarWrap.className = "profile-avatar-wrap";
+      const avatar = document.createElement("div");
+      avatar.className = "profile-avatar";
+      avatar.innerHTML = profile.svg;
+      avatarWrap.appendChild(avatar);
+
+      const name = document.createElement("span");
+      name.className = "profile-name";
+      name.textContent = profile.name;
+
+      const points = document.createElement("span");
+      points.className = "profile-points";
+      points.innerHTML = `<strong>${state.points[id]}</strong> pt${state.points[id] === 1 ? "" : "s"}`;
+
+      card.append(avatarWrap, name, points);
+      card.addEventListener("click", () => {
+        state.currentUser = id;
+        saveData();
+        renderProfileBar();
+      });
+
+      profileBarEl.appendChild(card);
+    }
+  }
+
+  function renderWhoSheet() {
+    whoGridEl.innerHTML = "";
+    for (const id of PROFILE_IDS) {
+      const profile = PROFILES[id];
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "who-card";
+
+      const avatar = document.createElement("div");
+      avatar.className = "profile-avatar";
+      avatar.innerHTML = profile.svg;
+
+      const name = document.createElement("span");
+      name.textContent = profile.name;
+
+      card.append(avatar, name);
+      card.addEventListener("click", () => {
+        state.currentUser = id;
+        saveData();
+        renderProfileBar();
+        whoSheetBackdrop.hidden = true;
+      });
+
+      whoGridEl.appendChild(card);
+    }
+  }
+
+  function awardPoint(userId) {
+    if (!PROFILE_IDS.includes(userId)) return;
+    state.points[userId] += 1;
+    saveData();
+    renderProfileBar();
+
+    const card = profileBarEl.querySelector(`[data-profile-id="${userId}"]`);
+    if (!card) return;
+    const avatarWrap = card.querySelector(".profile-avatar-wrap");
+    const avatar = card.querySelector(".profile-avatar");
+
+    const popup = document.createElement("span");
+    popup.className = "point-popup";
+    popup.textContent = "+1";
+    avatarWrap.appendChild(popup);
+    popup.addEventListener("animationend", () => popup.remove());
+
+    avatar.classList.remove("dancing");
+    // eslint-disable-next-line no-unused-expressions
+    void avatar.offsetWidth; // restart animation
+    avatar.classList.add("dancing");
+    avatar.addEventListener("animationend", () => avatar.classList.remove("dancing"), { once: true });
+  }
+
+  renderProfileBar();
+  if (!state.currentUser) {
+    renderWhoSheet();
+    whoSheetBackdrop.hidden = false;
   }
 
   // ---------- Tabs ----------
@@ -178,6 +311,7 @@
       state.counters[activeCounterId].lastEmptied = todayStr();
       saveData();
       renderCounters();
+      if (state.currentUser) awardPoint(state.currentUser);
     }
     closeBinSheet();
   });

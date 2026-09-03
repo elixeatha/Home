@@ -10,6 +10,7 @@
   <div class="app">
     <header class="app-header">
       <h1>🏡 Our Home</h1>
+      <div class="profile-bar" id="profile-bar"></div>
       <nav class="tabs">
         <button class="tab-btn active" data-tab="home">Home</button>
         <button class="tab-btn" data-tab="improvement">Home Improvement</button>
@@ -66,6 +67,15 @@
       <p id="bin-sheet-sub" class="sheet-sub"></p>
       <button id="bin-sheet-empty" class="btn-primary">Empty bin</button>
       <button id="bin-sheet-cancel" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Who are you? sheet -->
+  <div id="who-sheet-backdrop" class="sheet-backdrop" hidden>
+    <div class="sheet">
+      <h3>Who's using the app?</h3>
+      <p class="sheet-sub">Pick a profile — you can switch anytime by tapping the other avatar.</p>
+      <div class="who-grid" id="who-grid"></div>
     </div>
   </div>
 

@@ -60,6 +60,141 @@ body {
   font-size: 1.5rem;
 }
 
+/* Profile bar */
+.profile-bar {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.profile-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 12px;
+  color: var(--text);
+  position: relative;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.profile-avatar svg { display: block; width: 100%; height: 100%; }
+
+.profile-card.active .profile-avatar {
+  border-color: var(--accent);
+}
+
+.profile-card:not(.active) .profile-avatar {
+  opacity: 0.55;
+}
+
+.profile-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.profile-card:not(.active) .profile-name {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.profile-points {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.profile-points strong {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.point-popup {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  pointer-events: none;
+  animation: point-float 1s ease-out forwards;
+}
+
+@keyframes point-float {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  20% { opacity: 1; transform: translateY(-6px) scale(1.1); }
+  70% { opacity: 1; transform: translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translateY(-26px) scale(0.9); }
+}
+
+.profile-avatar.dancing {
+  animation: avatar-dance 0.9s ease-in-out;
+}
+
+@keyframes avatar-dance {
+  0%   { transform: rotate(0deg) scale(1); }
+  15%  { transform: rotate(-16deg) scale(1.05) translateY(-2px); }
+  30%  { transform: rotate(14deg) scale(1.1) translateY(-6px); }
+  45%  { transform: rotate(-12deg) scale(1.05) translateY(-2px); }
+  60%  { transform: rotate(10deg) scale(1.1) translateY(-6px); }
+  75%  { transform: rotate(-6deg) scale(1.02); }
+  90%  { transform: rotate(4deg) scale(1.02); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* Who-are-you sheet */
+.who-grid {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 6px 0 4px;
+}
+
+.who-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.who-card .profile-avatar {
+  width: 72px;
+  height: 72px;
+}
+
+.who-card span {
+  font-weight: 600;
+}
+
 .tabs {
   display: flex;
   gap: 8px;
