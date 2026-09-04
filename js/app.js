@@ -7,27 +7,37 @@
     jennie: {
       name: "Jennie",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="50" fill="#241f1f"/>
-        <circle cx="50" cy="58" r="28" fill="#f6cba3"/>
-        <path d="M14,55 Q14,18 50,18 Q86,18 86,55 L86,92 L74,92 Q74,50 66,44 Q58,50 50,50 Q42,50 34,44 Q26,50 26,92 L14,92 Z" fill="#241f1f"/>
-        <ellipse cx="40" cy="60" rx="4" ry="5" fill="#5b3a29"/>
-        <ellipse cx="60" cy="60" rx="4" ry="5" fill="#5b3a29"/>
-        <path d="M42,74 Q50,80 58,74" stroke="#8a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="68" r="5" fill="#f2a58c" opacity="0.5"/>
-        <circle cx="68" cy="68" r="5" fill="#f2a58c" opacity="0.5"/>
+        <circle cx="50" cy="50" r="50" fill="#efd9c8"/>
+        <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#d98a8a"/>
+        <path d="M42,68 L42,80 C42,86 58,86 58,80 L58,68 Z" fill="#e3ab86"/>
+        <ellipse cx="21" cy="62" rx="5" ry="7" fill="#e3ab86"/>
+        <ellipse cx="79" cy="62" rx="5" ry="7" fill="#e3ab86"/>
+        <path d="M50,24 C66,24 76,38 76,56 C76,74 64,84 50,84 C36,84 24,74 24,56 C24,38 34,24 50,24 Z" fill="#e3ab86"/>
+        <ellipse cx="38" cy="58" rx="3.6" ry="4.6" fill="#4a2f22"/>
+        <ellipse cx="62" cy="58" rx="3.6" ry="4.6" fill="#4a2f22"/>
+        <path d="M40,70 Q50,77 60,70" stroke="#a15c46" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="30" cy="65" r="4.5" fill="#f0a68c" opacity="0.45"/>
+        <circle cx="70" cy="65" r="4.5" fill="#f0a68c" opacity="0.45"/>
+        <path d="M12,54 Q12,14 50,14 Q88,14 88,54 L88,98 L74,98 Q74,48 65,42 Q57,48 50,48 Q43,48 35,42 Q26,48 26,98 L12,98 Z" fill="#1f1a19"/>
       </svg>`,
     },
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="50" fill="#fbe0c2"/>
-        <circle cx="50" cy="58" r="28" fill="#fbe0c2"/>
-        <path d="M18,52 Q18,16 50,16 Q82,16 82,52 Q82,38 72,32 Q64,42 50,42 Q36,42 28,32 Q18,38 18,52 Z" fill="#6b4226"/>
-        <ellipse cx="40" cy="60" rx="4" ry="5" fill="#3f7cc9"/>
-        <ellipse cx="60" cy="60" rx="4" ry="5" fill="#3f7cc9"/>
-        <path d="M42,74 Q50,80 58,74" stroke="#c17a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="68" r="5" fill="#f2a58c" opacity="0.4"/>
-        <circle cx="68" cy="68" r="5" fill="#f2a58c" opacity="0.4"/>
+        <circle cx="50" cy="50" r="50" fill="#dfe9ee"/>
+        <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#5b7fa6"/>
+        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f6ceA0"/>
+        <ellipse cx="22" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
+        <ellipse cx="78" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
+        <path d="M50,25 C65,25 75,38 75,55 C75,73 63,83 50,83 C37,83 25,73 25,55 C25,38 35,25 50,25 Z" fill="#f6ceA0"/>
+        <ellipse cx="38.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <ellipse cx="61.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <path d="M40,69 Q50,76 60,69" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="31" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <circle cx="69" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <path d="M18,54 C16,32 30,14 50,14 C70,14 84,32 82,54 C80,40 74,30 68,28 C64,34 56,30 56,24 C50,32 42,34 36,28 C30,30 22,40 18,54 Z" fill="#5a3a24"/>
+        <path d="M18,54 C17,44 20,36 25,30 C22,38 22,48 24,56 Z" fill="#4a2f1c"/>
+        <path d="M82,54 C83,44 80,36 75,30 C78,38 78,48 76,56 Z" fill="#4a2f1c"/>
       </svg>`,
     },
   };
