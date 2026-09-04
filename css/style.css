@@ -33,6 +33,8 @@
 
 * { box-sizing: border-box; }
 
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -283,6 +285,64 @@ button {
 }
 
 .stacked-form button { align-self: flex-start; }
+
+/* Gousto tracker */
+.gousto-card {
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.gousto-status {
+  color: var(--text-muted);
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+}
+
+.gousto-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.gousto-actions[hidden] {
+  display: none;
+}
+
+.gousto-actions .btn-primary,
+.gousto-actions .btn-secondary {
+  margin-bottom: 0;
+}
+
+.gousto-undo {
+  background: none;
+  border: none;
+  color: inherit;
+  text-decoration: underline;
+  font-size: 0.82rem;
+  padding: 0;
+  opacity: 0.85;
+}
+
+.gousto-card.status-urgent {
+  background: var(--red);
+  color: #fff;
+}
+
+.gousto-card.status-urgent .gousto-status {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.gousto-card.status-urgent .btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.gousto-card.status-ordered {
+  background: var(--accent-soft);
+}
+
+.gousto-card.status-skipped {
+  background: var(--border);
+}
 
 /* Shopping list */
 .shopping-list {

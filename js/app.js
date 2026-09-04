@@ -7,28 +7,25 @@
     jennie: {
       name: "Jennie",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="54" r="34" fill="#241f1f"/>
         <circle cx="50" cy="58" r="28" fill="#f6cba3"/>
-        <path d="M22,48 Q22,26 50,26 Q78,26 78,48 L78,44 Q78,30 50,30 Q22,30 22,44 Z" fill="#241f1f"/>
-        <path d="M20,44 Q17,68 25,88 L34,88 Q28,66 30,45 Z" fill="#241f1f"/>
-        <path d="M80,44 Q83,68 75,88 L66,88 Q72,66 70,45 Z" fill="#241f1f"/>
-        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#5b3a29"/>
-        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#5b3a29"/>
-        <path d="M42,73 Q50,79 58,73" stroke="#8a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
-        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
+        <path d="M14,55 Q14,18 50,18 Q86,18 86,55 L86,92 L74,92 Q74,50 66,44 Q58,50 50,50 Q42,50 34,44 Q26,50 26,92 L14,92 Z" fill="#241f1f"/>
+        <ellipse cx="40" cy="60" rx="4" ry="5" fill="#5b3a29"/>
+        <ellipse cx="60" cy="60" rx="4" ry="5" fill="#5b3a29"/>
+        <path d="M42,74 Q50,80 58,74" stroke="#8a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="32" cy="68" r="5" fill="#f2a58c" opacity="0.5"/>
+        <circle cx="68" cy="68" r="5" fill="#f2a58c" opacity="0.5"/>
       </svg>`,
     },
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <circle cx="50" cy="58" r="28" fill="#fbe0c2"/>
-        <path d="M20,52 Q17,23 50,21 Q83,23 80,52 Q78,33 66,29 Q58,36 50,29 Q42,36 34,29 Q22,33 20,52 Z" fill="#6b4226"/>
-        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
-        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
-        <path d="M42,73 Q50,79 58,73" stroke="#c17a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
-        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
+        <path d="M18,52 Q18,16 50,16 Q82,16 82,52 Q82,38 72,32 Q64,42 50,42 Q36,42 28,32 Q18,38 18,52 Z" fill="#6b4226"/>
+        <ellipse cx="40" cy="60" rx="4" ry="5" fill="#3f7cc9"/>
+        <ellipse cx="60" cy="60" rx="4" ry="5" fill="#3f7cc9"/>
+        <path d="M42,74 Q50,80 58,74" stroke="#c17a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="32" cy="68" r="5" fill="#f2a58c" opacity="0.4"/>
+        <circle cx="68" cy="68" r="5" fill="#f2a58c" opacity="0.4"/>
       </svg>`,
     },
   };
@@ -52,6 +49,14 @@
     return Math.max(0, diff);
   }
 
+  function mondayOf(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    const day = d.getDay(); // 0 = Sun ... 6 = Sat
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diffToMonday);
+    return d.toISOString().slice(0, 10);
+  }
+
   function loadData() {
     let raw;
     try {
@@ -73,6 +78,10 @@
       if (typeof data.points[id] !== "number") data.points[id] = 0;
     }
     if (!PROFILE_IDS.includes(data.currentUser)) data.currentUser = null;
+    const currentMonday = mondayOf(todayStr());
+    if (!data.gousto || typeof data.gousto !== "object" || data.gousto.weekStart !== currentMonday) {
+      data.gousto = { weekStart: currentMonday, status: "pending" };
+    }
     return data;
   }
 
@@ -182,6 +191,71 @@
     renderWhoSheet();
     whoSheetBackdrop.hidden = false;
   }
+
+  // ---------- Gousto tracker ----------
+  const goustoCard = document.getElementById("gousto-card");
+  const goustoStatusEl = document.getElementById("gousto-status");
+  const goustoActionsEl = document.getElementById("gousto-actions");
+  const goustoOrderedBtn = document.getElementById("gousto-ordered-btn");
+  const goustoSkipBtn = document.getElementById("gousto-skip-btn");
+  const goustoUndoBtn = document.getElementById("gousto-undo-btn");
+
+  function refreshGoustoWeek() {
+    const currentMonday = mondayOf(todayStr());
+    if (state.gousto.weekStart !== currentMonday) {
+      state.gousto = { weekStart: currentMonday, status: "pending" };
+      saveData();
+    }
+  }
+
+  function isGoustoUrgent() {
+    const dow = new Date().getDay(); // 0 Sun, 5 Fri, 6 Sat
+    return dow === 5 || dow === 6 || dow === 0;
+  }
+
+  function renderGousto() {
+    refreshGoustoWeek();
+    const { status } = state.gousto;
+    const urgent = status === "pending" && isGoustoUrgent();
+
+    goustoCard.className = `card gousto-card${
+      status === "ordered" ? " status-ordered" : status === "skipped" ? " status-skipped" : urgent ? " status-urgent" : ""
+    }`;
+
+    if (status === "ordered") {
+      goustoStatusEl.textContent = "✅ Ordered for this week — nice one.";
+    } else if (status === "skipped") {
+      goustoStatusEl.textContent = "⏭️ Skipped this week — no delivery needed.";
+    } else if (urgent) {
+      goustoStatusEl.textContent = "⚠️ Not ordered yet — order today, or it'll be too late for this week!";
+    } else {
+      goustoStatusEl.textContent = "Order by Saturday, or skip if you don't need a box this week.";
+    }
+
+    goustoActionsEl.hidden = status !== "pending";
+    goustoUndoBtn.hidden = status === "pending";
+  }
+
+  goustoOrderedBtn.addEventListener("click", () => {
+    state.gousto.status = "ordered";
+    saveData();
+    renderGousto();
+  });
+
+  goustoSkipBtn.addEventListener("click", () => {
+    state.gousto.status = "skipped";
+    saveData();
+    renderGousto();
+  });
+
+  goustoUndoBtn.addEventListener("click", () => {
+    state.gousto.status = "pending";
+    saveData();
+    renderGousto();
+  });
+
+  // Re-check hourly in case the tab is left open across a day boundary (Friday/Monday rollover)
+  setInterval(renderGousto, 60 * 60 * 1000);
 
   // ---------- Tabs ----------
   document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -461,4 +535,5 @@
   renderShopping();
   renderCounters();
   renderImprovements();
+  renderGousto();
 })();
