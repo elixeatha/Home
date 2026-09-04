@@ -60,7 +60,24 @@ body {
 .app-header h1 {
   margin: 0 0 14px;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.sync-status {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.sync-status.status-synced { color: var(--green); }
+.sync-status.status-error { color: var(--red); }
 
 /* Profile bar */
 .profile-bar {

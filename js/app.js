@@ -1,7 +1,10 @@
+import { firebaseConfig } from "./firebase-config.js";
+
 (() => {
   "use strict";
 
   const STORAGE_KEY = "ourhome-data-v1";
+  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto"];
 
   const PROFILES = {
     jennie: {
@@ -99,12 +102,105 @@
 
   function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    pushToFirestore();
   }
 
   const state = loadData();
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---------- Cross-device sync (Firestore) ----------
+  // The household's shared data (shopping list, counters, points, improvements,
+  // Gousto status) syncs through a single Firestore document so both of you see
+  // the same state. `currentUser` (who's using this device) stays local on
+  // purpose. If firebase-config.js hasn't been filled in, the app just runs
+  // local-only — see README.md.
+  const syncStatusEl = document.getElementById("sync-status");
+  let db = null;
+  let firestoreApi = null; // { doc, setDoc, onSnapshot }
+  let firestoreReady = false;
+  let applyingRemote = false;
+  let pushTimer = null;
+
+  function setSyncStatus(text, cls) {
+    if (!syncStatusEl) return;
+    syncStatusEl.textContent = text;
+    syncStatusEl.className = `sync-status ${cls || ""}`.trim();
+  }
+
+  function isFirebaseConfigured() {
+    return Boolean(firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_"));
+  }
+
+  function getSharedState() {
+    const out = {};
+    for (const key of SHARED_KEYS) out[key] = state[key];
+    return out;
+  }
+
+  function applyRemoteState(data) {
+    applyingRemote = true;
+    for (const key of SHARED_KEYS) {
+      if (data[key] !== undefined) state[key] = data[key];
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderAll();
+    applyingRemote = false;
+  }
+
+  function pushToFirestore() {
+    if (!firestoreReady || applyingRemote) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      const { doc, setDoc } = firestoreApi;
+      setDoc(doc(db, "households", "main"), getSharedState(), { merge: true }).catch((err) => {
+        console.error("Failed to sync to Firestore:", err);
+        setSyncStatus("⚠️ Sync error", "status-error");
+      });
+    }, 250);
+  }
+
+  // Firebase is loaded dynamically (not a static import) so that if the CDN is
+  // unreachable — offline, blocked network, or Firebase just isn't configured
+  // yet — the rest of the app still loads and works fully offline/local-only.
+  async function initFirebaseSync() {
+    if (!isFirebaseConfigured()) {
+      setSyncStatus("📴 Local only", "");
+      return;
+    }
+    setSyncStatus("🔄 Connecting…", "");
+    try {
+      const [{ initializeApp }, { getFirestore, doc, setDoc, onSnapshot }] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"),
+      ]);
+      firestoreApi = { doc, setDoc, onSnapshot };
+
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      firestoreReady = true;
+      const ref = doc(db, "households", "main");
+      onSnapshot(
+        ref,
+        (snap) => {
+          if (snap.exists()) {
+            applyRemoteState(snap.data());
+          } else {
+            setDoc(ref, getSharedState());
+          }
+          setSyncStatus("☁️ Synced", "status-synced");
+        },
+        (err) => {
+          console.error("Firestore sync error:", err);
+          setSyncStatus("⚠️ Sync error", "status-error");
+        }
+      );
+    } catch (err) {
+      console.error("Failed to initialize Firebase (running local-only):", err);
+      setSyncStatus("📴 Local only", "");
+    }
   }
 
   // ---------- Profiles & points ----------
@@ -544,8 +640,17 @@
   });
 
   // ---------- Init ----------
+  function renderAll() {
+    renderProfileBar();
+    renderShopping();
+    renderCounters();
+    renderImprovements();
+    renderGousto();
+  }
+
   renderShopping();
   renderCounters();
   renderImprovements();
   renderGousto();
+  initFirebaseSync();
 })();
