@@ -7,6 +7,7 @@
     jennie: {
       name: "Jennie",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="50" fill="#241f1f"/>
         <circle cx="50" cy="58" r="28" fill="#f6cba3"/>
         <path d="M14,55 Q14,18 50,18 Q86,18 86,55 L86,92 L74,92 Q74,50 66,44 Q58,50 50,50 Q42,50 34,44 Q26,50 26,92 L14,92 Z" fill="#241f1f"/>
         <ellipse cx="40" cy="60" rx="4" ry="5" fill="#5b3a29"/>
@@ -19,6 +20,7 @@
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="50" fill="#fbe0c2"/>
         <circle cx="50" cy="58" r="28" fill="#fbe0c2"/>
         <path d="M18,52 Q18,16 50,16 Q82,16 82,52 Q82,38 72,32 Q64,42 50,42 Q36,42 28,32 Q18,38 18,52 Z" fill="#6b4226"/>
         <ellipse cx="40" cy="60" rx="4" ry="5" fill="#3f7cc9"/>
