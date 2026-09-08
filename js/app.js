@@ -27,20 +27,18 @@ import { firebaseConfig } from "./firebase-config.js";
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="50" fill="#dfe9ee"/>
+        <circle cx="50" cy="50" r="50" fill="#fbe2c4"/>
         <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#5b7fa6"/>
-        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f6ceA0"/>
-        <ellipse cx="22" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
-        <ellipse cx="78" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
-        <path d="M50,25 C65,25 75,38 75,55 C75,73 63,83 50,83 C37,83 25,73 25,55 C25,38 35,25 50,25 Z" fill="#f6ceA0"/>
-        <ellipse cx="38.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
-        <ellipse cx="61.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
-        <path d="M40,69 Q50,76 60,69" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <circle cx="31" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
-        <circle cx="69" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
-        <path d="M18,54 C16,32 30,14 50,14 C70,14 84,32 82,54 C80,40 74,30 68,28 C64,34 56,30 56,24 C50,32 42,34 36,28 C30,30 22,40 18,54 Z" fill="#5a3a24"/>
-        <path d="M15,30 C13,40 14,50 18,58 C21,58 23,53 21,48 C18,43 17,35 21,28 C19,27 16,28 15,30 Z" fill="#5a3a24"/>
-        <path d="M85,30 C87,40 86,50 82,58 C79,58 77,53 79,48 C82,43 83,35 79,28 C81,27 84,28 85,30 Z" fill="#5a3a24"/>
+        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f0c294"/>
+        <ellipse cx="21" cy="62" rx="5" ry="7" fill="#f0c294"/>
+        <ellipse cx="79" cy="62" rx="5" ry="7" fill="#f0c294"/>
+        <path d="M50,24 C65,24 75,37 75,55 C75,73 63,84 50,84 C37,84 25,73 25,55 C25,37 35,24 50,24 Z" fill="#f0c294"/>
+        <ellipse cx="38.5" cy="58" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <ellipse cx="61.5" cy="58" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <path d="M40,70 Q50,77 60,70" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="31" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <circle cx="69" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <path d="M14,50 Q14,10 50,10 Q86,10 86,50 Q86,38 70,32 Q60,41 50,37 Q40,41 30,32 Q14,38 14,50 Z" fill="#5a3a24"/>
       </svg>`,
     },
   };
