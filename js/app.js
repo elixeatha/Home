@@ -38,7 +38,7 @@ import { firebaseConfig } from "./firebase-config.js";
         <path d="M40,70 Q50,77 60,70" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
         <circle cx="31" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
         <circle cx="69" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
-        <path d="M20,50 Q20,12 50,12 Q80,12 80,50 Q80,37 66,31 Q58,40 50,36 Q42,40 34,31 Q20,37 20,50 Z" fill="#5a3a24"/>
+        <path d="M27,50 Q27,12 50,12 Q73,12 73,50 Q73,38 62,32 Q56,40 50,36 Q44,40 38,32 Q27,38 27,50 Z" fill="#5a3a24"/>
       </svg>`,
     },
   };
