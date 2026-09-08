@@ -37,39 +37,36 @@ then visit `http://localhost:8000`.
 
 ## Cross-device syncing (shared data)
 
-By default each device only sees its own data (stored in the browser's `localStorage`), because a static GitHub Pages site has no server of its own to hold shared state. To make the shopping list, bins, points, Gousto status etc. actually sync between your phones, this app can optionally connect to a free **Firebase Firestore** database. It's a ~3 minute, no-code setup:
+By default each device only sees its own data (stored in the browser's `localStorage`), because a static GitHub Pages site has no server of its own to hold shared state. To make the shopping list, bins, points, Gousto status etc. actually sync between your phones, this app connects to a **Firebase Realtime Database**.
 
-1. Go to [console.firebase.google.com](https://console.firebase.google.com) and create a free project (any name, e.g. "our-home").
-2. In the project, go to **Build → Firestore Database → Create database**. Choose a region close to you and start in **test mode** (we'll tighten the rules in step 5).
-3. Go to **Project settings** (gear icon) → scroll to "Your apps" → click the `</>` (web) icon → register an app (any nickname, no need for Firebase Hosting). Firebase will show you a `firebaseConfig` object with your keys.
-4. Open `js/firebase-config.js` in this repo and paste your values in, replacing the placeholders:
-   ```js
-   export const firebaseConfig = {
-     apiKey: "...",
-     authDomain: "...",
-     projectId: "...",
-     storageBucket: "...",
-     messagingSenderId: "...",
-     appId: "...",
-   };
-   ```
-   Commit and push — Firebase web config values are safe to have in a public repo; they identify your project but don't grant access by themselves (that's what the security rules below are for).
-5. Back in Firestore, go to the **Rules** tab and replace the default rules with:
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /households/main {
-         allow read, write: if true;
-       }
-     }
-   }
-   ```
-   **Security note:** this keeps things simple for a 2-person app with no login — anyone who discovers your Firebase project ID could read or write your household data. That's a reasonable trade-off for a shopping list and bin counters, but don't put anything sensitive in this app. If you want it locked down properly later, that needs adding Firebase Authentication and rules scoped to signed-in users — happy to set that up if you want it.
+This is already wired up in `js/firebase-config.js`, pointing at:
 
-Once both of those are in place, reload the app on both phones — the little badge next to the "Our Home" title will show "☁️ Synced" once it's connected, and changes on one device will show up on the other within a second or two. Until you do this setup, the badge shows "📴 Local only" and the app works exactly as before, just per-device.
+```
+https://home-53bfe-default-rtdb.europe-west1.firebasedatabase.app
+```
+
+The one thing left to do is set the database's **security rules** — by default Firebase denies all read/write access, so nothing syncs until you open this up. In the [Firebase console](https://console.firebase.google.com) for this project, go to **Build → Realtime Database → Rules**, and set:
+
+```json
+{
+  "rules": {
+    "households": {
+      "main": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+}
+```
+
+Then **Publish**. Reload the app on both phones — the little badge next to the "Our Home" title will show "☁️ Synced" once it's connected, and changes on one device will show up on the other within a second or two.
+
+**Security note:** these rules keep things simple for a 2-person app with no login — anyone who discovers your database URL could read or write your household data. That's a reasonable trade-off for a shopping list and bin counters, but don't put anything sensitive in this app. If you want it locked down properly later, that needs adding Firebase Authentication and rules scoped to signed-in users — happy to set that up if you want it.
+
+If `js/firebase-config.js` is ever missing its `databaseURL`, or the CDN can't be reached (offline, blocked network), the badge shows "📴 Local only" and the app works exactly as before, just per-device — nothing breaks.
 
 ## Data storage
 
-- Shared data (shopping list, bin/laundry counters, points, Home Improvement projects, Gousto status) syncs via Firestore once configured, and is cached in `localStorage` so the app still works offline.
+- Shared data (shopping list, bin/laundry counters, points, Home Improvement projects, Gousto status) syncs via the Realtime Database once its rules are published, and is cached in `localStorage` so the app still works offline.
 - Which profile is "active" on a given device is stored locally only (not shared) — Jennie's phone and Will's phone can each have their own person selected.

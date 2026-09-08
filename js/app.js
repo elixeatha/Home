@@ -100,7 +100,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
   function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    pushToFirestore();
+    pushToDatabase();
   }
 
   const state = loadData();
@@ -109,18 +109,19 @@ import { firebaseConfig } from "./firebase-config.js";
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
 
-  // ---------- Cross-device sync (Firestore) ----------
+  // ---------- Cross-device sync (Firebase Realtime Database) ----------
   // The household's shared data (shopping list, counters, points, improvements,
-  // Gousto status) syncs through a single Firestore document so both of you see
-  // the same state. `currentUser` (who's using this device) stays local on
+  // Gousto status) syncs through a single Realtime Database node so both of you
+  // see the same state. `currentUser` (who's using this device) stays local on
   // purpose. If firebase-config.js hasn't been filled in, the app just runs
   // local-only — see README.md.
   const syncStatusEl = document.getElementById("sync-status");
   let db = null;
-  let firestoreApi = null; // { doc, setDoc, onSnapshot }
-  let firestoreReady = false;
+  let dbApi = null; // { ref, onValue, set }
+  let dbReady = false;
   let applyingRemote = false;
   let pushTimer = null;
+  const HOUSEHOLD_PATH = "households/main";
 
   function setSyncStatus(text, cls) {
     if (!syncStatusEl) return;
@@ -129,7 +130,9 @@ import { firebaseConfig } from "./firebase-config.js";
   }
 
   function isFirebaseConfigured() {
-    return Boolean(firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_"));
+    return Boolean(
+      firebaseConfig && firebaseConfig.databaseURL && firebaseConfig.databaseURL.startsWith("https://")
+    );
   }
 
   function getSharedState() {
@@ -148,13 +151,13 @@ import { firebaseConfig } from "./firebase-config.js";
     applyingRemote = false;
   }
 
-  function pushToFirestore() {
-    if (!firestoreReady || applyingRemote) return;
+  function pushToDatabase() {
+    if (!dbReady || applyingRemote) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(() => {
-      const { doc, setDoc } = firestoreApi;
-      setDoc(doc(db, "households", "main"), getSharedState(), { merge: true }).catch((err) => {
-        console.error("Failed to sync to Firestore:", err);
+      const { ref, set } = dbApi;
+      set(ref(db, HOUSEHOLD_PATH), getSharedState()).catch((err) => {
+        console.error("Failed to sync to Realtime Database:", err);
         setSyncStatus("⚠️ Sync error", "status-error");
       });
     }, 250);
@@ -170,28 +173,29 @@ import { firebaseConfig } from "./firebase-config.js";
     }
     setSyncStatus("🔄 Connecting…", "");
     try {
-      const [{ initializeApp }, { getFirestore, doc, setDoc, onSnapshot }] = await Promise.all([
+      const [{ initializeApp }, { getDatabase, ref, onValue, set }] = await Promise.all([
         import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"),
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"),
       ]);
-      firestoreApi = { doc, setDoc, onSnapshot };
+      dbApi = { ref, onValue, set };
 
       const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      firestoreReady = true;
-      const ref = doc(db, "households", "main");
-      onSnapshot(
-        ref,
-        (snap) => {
-          if (snap.exists()) {
-            applyRemoteState(snap.data());
+      db = getDatabase(app, firebaseConfig.databaseURL);
+      dbReady = true;
+      const householdRef = ref(db, HOUSEHOLD_PATH);
+      onValue(
+        householdRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            applyRemoteState(data);
           } else {
-            setDoc(ref, getSharedState());
+            set(householdRef, getSharedState());
           }
           setSyncStatus("☁️ Synced", "status-synced");
         },
         (err) => {
-          console.error("Firestore sync error:", err);
+          console.error("Realtime Database sync error:", err);
           setSyncStatus("⚠️ Sync error", "status-error");
         }
       );
