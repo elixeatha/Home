@@ -27,20 +27,18 @@ import { firebaseConfig } from "./firebase-config.js";
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="50" fill="#dfe9ee"/>
+        <circle cx="50" cy="50" r="50" fill="#fbe2c4"/>
         <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#5b7fa6"/>
-        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f6ceA0"/>
-        <ellipse cx="22" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
-        <ellipse cx="78" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
-        <path d="M50,25 C65,25 75,38 75,55 C75,73 63,83 50,83 C37,83 25,73 25,55 C25,38 35,25 50,25 Z" fill="#f6ceA0"/>
-        <ellipse cx="38.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
-        <ellipse cx="61.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
-        <path d="M40,69 Q50,76 60,69" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <circle cx="31" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
-        <circle cx="69" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
-        <path d="M18,54 C16,32 30,14 50,14 C70,14 84,32 82,54 C80,40 74,30 68,28 C64,34 56,30 56,24 C50,32 42,34 36,28 C30,30 22,40 18,54 Z" fill="#5a3a24"/>
-        <path d="M15,30 C13,40 14,50 18,58 C21,58 23,53 21,48 C18,43 17,35 21,28 C19,27 16,28 15,30 Z" fill="#5a3a24"/>
-        <path d="M85,30 C87,40 86,50 82,58 C79,58 77,53 79,48 C82,43 83,35 79,28 C81,27 84,28 85,30 Z" fill="#5a3a24"/>
+        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f0c294"/>
+        <ellipse cx="21" cy="62" rx="5" ry="7" fill="#f0c294"/>
+        <ellipse cx="79" cy="62" rx="5" ry="7" fill="#f0c294"/>
+        <path d="M50,24 C65,24 75,37 75,55 C75,73 63,84 50,84 C37,84 25,73 25,55 C25,37 35,24 50,24 Z" fill="#f0c294"/>
+        <ellipse cx="38.5" cy="58" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <ellipse cx="61.5" cy="58" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <path d="M40,70 Q50,77 60,70" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="31" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <circle cx="69" cy="65" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <path d="M27,54 Q27,16 50,16 Q73,16 73,54 Q73,42 62,36 Q56,44 50,40 Q44,44 38,36 Q27,42 27,54 Z" fill="#5a3a24"/>
       </svg>`,
     },
   };
@@ -102,7 +100,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
   function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    pushToFirestore();
+    pushToDatabase();
   }
 
   const state = loadData();
@@ -111,18 +109,19 @@ import { firebaseConfig } from "./firebase-config.js";
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
 
-  // ---------- Cross-device sync (Firestore) ----------
+  // ---------- Cross-device sync (Firebase Realtime Database) ----------
   // The household's shared data (shopping list, counters, points, improvements,
-  // Gousto status) syncs through a single Firestore document so both of you see
-  // the same state. `currentUser` (who's using this device) stays local on
+  // Gousto status) syncs through a single Realtime Database node so both of you
+  // see the same state. `currentUser` (who's using this device) stays local on
   // purpose. If firebase-config.js hasn't been filled in, the app just runs
   // local-only — see README.md.
   const syncStatusEl = document.getElementById("sync-status");
   let db = null;
-  let firestoreApi = null; // { doc, setDoc, onSnapshot }
-  let firestoreReady = false;
+  let dbApi = null; // { ref, onValue, set }
+  let dbReady = false;
   let applyingRemote = false;
   let pushTimer = null;
+  const HOUSEHOLD_PATH = "households/main";
 
   function setSyncStatus(text, cls) {
     if (!syncStatusEl) return;
@@ -131,7 +130,9 @@ import { firebaseConfig } from "./firebase-config.js";
   }
 
   function isFirebaseConfigured() {
-    return Boolean(firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_"));
+    return Boolean(
+      firebaseConfig && firebaseConfig.databaseURL && firebaseConfig.databaseURL.startsWith("https://")
+    );
   }
 
   function getSharedState() {
@@ -150,13 +151,13 @@ import { firebaseConfig } from "./firebase-config.js";
     applyingRemote = false;
   }
 
-  function pushToFirestore() {
-    if (!firestoreReady || applyingRemote) return;
+  function pushToDatabase() {
+    if (!dbReady || applyingRemote) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(() => {
-      const { doc, setDoc } = firestoreApi;
-      setDoc(doc(db, "households", "main"), getSharedState(), { merge: true }).catch((err) => {
-        console.error("Failed to sync to Firestore:", err);
+      const { ref, set } = dbApi;
+      set(ref(db, HOUSEHOLD_PATH), getSharedState()).catch((err) => {
+        console.error("Failed to sync to Realtime Database:", err);
         setSyncStatus("⚠️ Sync error", "status-error");
       });
     }, 250);
@@ -172,28 +173,29 @@ import { firebaseConfig } from "./firebase-config.js";
     }
     setSyncStatus("🔄 Connecting…", "");
     try {
-      const [{ initializeApp }, { getFirestore, doc, setDoc, onSnapshot }] = await Promise.all([
+      const [{ initializeApp }, { getDatabase, ref, onValue, set }] = await Promise.all([
         import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"),
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"),
       ]);
-      firestoreApi = { doc, setDoc, onSnapshot };
+      dbApi = { ref, onValue, set };
 
       const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      firestoreReady = true;
-      const ref = doc(db, "households", "main");
-      onSnapshot(
-        ref,
-        (snap) => {
-          if (snap.exists()) {
-            applyRemoteState(snap.data());
+      db = getDatabase(app, firebaseConfig.databaseURL);
+      dbReady = true;
+      const householdRef = ref(db, HOUSEHOLD_PATH);
+      onValue(
+        householdRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            applyRemoteState(data);
           } else {
-            setDoc(ref, getSharedState());
+            set(householdRef, getSharedState());
           }
           setSyncStatus("☁️ Synced", "status-synced");
         },
         (err) => {
-          console.error("Firestore sync error:", err);
+          console.error("Realtime Database sync error:", err);
           setSyncStatus("⚠️ Sync error", "status-error");
         }
       );
