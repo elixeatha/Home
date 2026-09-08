@@ -1,34 +1,46 @@
+import { firebaseConfig } from "./firebase-config.js";
+
 (() => {
   "use strict";
 
   const STORAGE_KEY = "ourhome-data-v1";
+  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto"];
 
   const PROFILES = {
     jennie: {
       name: "Jennie",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="54" r="34" fill="#241f1f"/>
-        <circle cx="50" cy="58" r="28" fill="#f6cba3"/>
-        <path d="M22,48 Q22,26 50,26 Q78,26 78,48 L78,44 Q78,30 50,30 Q22,30 22,44 Z" fill="#241f1f"/>
-        <path d="M20,44 Q17,68 25,88 L34,88 Q28,66 30,45 Z" fill="#241f1f"/>
-        <path d="M80,44 Q83,68 75,88 L66,88 Q72,66 70,45 Z" fill="#241f1f"/>
-        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#5b3a29"/>
-        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#5b3a29"/>
-        <path d="M42,73 Q50,79 58,73" stroke="#8a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
-        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.5"/>
+        <circle cx="50" cy="50" r="50" fill="#efd9c8"/>
+        <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#d98a8a"/>
+        <path d="M42,68 L42,80 C42,86 58,86 58,80 L58,68 Z" fill="#e3ab86"/>
+        <ellipse cx="21" cy="62" rx="5" ry="7" fill="#e3ab86"/>
+        <ellipse cx="79" cy="62" rx="5" ry="7" fill="#e3ab86"/>
+        <path d="M50,24 C66,24 76,38 76,56 C76,74 64,84 50,84 C36,84 24,74 24,56 C24,38 34,24 50,24 Z" fill="#e3ab86"/>
+        <ellipse cx="38" cy="58" rx="3.6" ry="4.6" fill="#4a2f22"/>
+        <ellipse cx="62" cy="58" rx="3.6" ry="4.6" fill="#4a2f22"/>
+        <path d="M40,70 Q50,77 60,70" stroke="#a15c46" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="30" cy="65" r="4.5" fill="#f0a68c" opacity="0.45"/>
+        <circle cx="70" cy="65" r="4.5" fill="#f0a68c" opacity="0.45"/>
+        <path d="M12,54 Q12,14 50,14 Q88,14 88,54 L88,98 L74,98 Q74,48 65,42 Q57,48 50,48 Q43,48 35,42 Q26,48 26,98 L12,98 Z" fill="#1f1a19"/>
       </svg>`,
     },
     will: {
       name: "Will",
       svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="58" r="28" fill="#fbe0c2"/>
-        <path d="M20,52 Q17,23 50,21 Q83,23 80,52 Q78,33 66,29 Q58,36 50,29 Q42,36 34,29 Q22,33 20,52 Z" fill="#6b4226"/>
-        <ellipse cx="40" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
-        <ellipse cx="60" cy="59" rx="4" ry="5" fill="#3f7cc9"/>
-        <path d="M42,73 Q50,79 58,73" stroke="#c17a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="32" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
-        <circle cx="68" cy="67" r="5" fill="#f2a58c" opacity="0.4"/>
+        <circle cx="50" cy="50" r="50" fill="#dfe9ee"/>
+        <path d="M0,100 C0,78 20,66 50,66 C80,66 100,78 100,100 Z" fill="#5b7fa6"/>
+        <path d="M42,68 L42,79 C42,85 58,85 58,79 L58,68 Z" fill="#f6ceA0"/>
+        <ellipse cx="22" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
+        <ellipse cx="78" cy="62" rx="5" ry="7" fill="#f6ceA0"/>
+        <path d="M50,25 C65,25 75,38 75,55 C75,73 63,83 50,83 C37,83 25,73 25,55 C25,38 35,25 50,25 Z" fill="#f6ceA0"/>
+        <ellipse cx="38.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <ellipse cx="61.5" cy="57" rx="3.4" ry="4.4" fill="#3f7cc9"/>
+        <path d="M40,69 Q50,76 60,69" stroke="#c17a4f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="31" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <circle cx="69" cy="64" r="4.2" fill="#f0a68c" opacity="0.4"/>
+        <path d="M18,54 C16,32 30,14 50,14 C70,14 84,32 82,54 C80,40 74,30 68,28 C64,34 56,30 56,24 C50,32 42,34 36,28 C30,30 22,40 18,54 Z" fill="#5a3a24"/>
+        <path d="M15,30 C13,40 14,50 18,58 C21,58 23,53 21,48 C18,43 17,35 21,28 C19,27 16,28 15,30 Z" fill="#5a3a24"/>
+        <path d="M85,30 C87,40 86,50 82,58 C79,58 77,53 79,48 C82,43 83,35 79,28 C81,27 84,28 85,30 Z" fill="#5a3a24"/>
       </svg>`,
     },
   };
@@ -52,6 +64,14 @@
     return Math.max(0, diff);
   }
 
+  function mondayOf(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    const day = d.getDay(); // 0 = Sun ... 6 = Sat
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diffToMonday);
+    return d.toISOString().slice(0, 10);
+  }
+
   function loadData() {
     let raw;
     try {
@@ -73,17 +93,114 @@
       if (typeof data.points[id] !== "number") data.points[id] = 0;
     }
     if (!PROFILE_IDS.includes(data.currentUser)) data.currentUser = null;
+    const currentMonday = mondayOf(todayStr());
+    if (!data.gousto || typeof data.gousto !== "object" || data.gousto.weekStart !== currentMonday) {
+      data.gousto = { weekStart: currentMonday, status: "pending" };
+    }
     return data;
   }
 
   function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    pushToFirestore();
   }
 
   const state = loadData();
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---------- Cross-device sync (Firestore) ----------
+  // The household's shared data (shopping list, counters, points, improvements,
+  // Gousto status) syncs through a single Firestore document so both of you see
+  // the same state. `currentUser` (who's using this device) stays local on
+  // purpose. If firebase-config.js hasn't been filled in, the app just runs
+  // local-only — see README.md.
+  const syncStatusEl = document.getElementById("sync-status");
+  let db = null;
+  let firestoreApi = null; // { doc, setDoc, onSnapshot }
+  let firestoreReady = false;
+  let applyingRemote = false;
+  let pushTimer = null;
+
+  function setSyncStatus(text, cls) {
+    if (!syncStatusEl) return;
+    syncStatusEl.textContent = text;
+    syncStatusEl.className = `sync-status ${cls || ""}`.trim();
+  }
+
+  function isFirebaseConfigured() {
+    return Boolean(firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_"));
+  }
+
+  function getSharedState() {
+    const out = {};
+    for (const key of SHARED_KEYS) out[key] = state[key];
+    return out;
+  }
+
+  function applyRemoteState(data) {
+    applyingRemote = true;
+    for (const key of SHARED_KEYS) {
+      if (data[key] !== undefined) state[key] = data[key];
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderAll();
+    applyingRemote = false;
+  }
+
+  function pushToFirestore() {
+    if (!firestoreReady || applyingRemote) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      const { doc, setDoc } = firestoreApi;
+      setDoc(doc(db, "households", "main"), getSharedState(), { merge: true }).catch((err) => {
+        console.error("Failed to sync to Firestore:", err);
+        setSyncStatus("⚠️ Sync error", "status-error");
+      });
+    }, 250);
+  }
+
+  // Firebase is loaded dynamically (not a static import) so that if the CDN is
+  // unreachable — offline, blocked network, or Firebase just isn't configured
+  // yet — the rest of the app still loads and works fully offline/local-only.
+  async function initFirebaseSync() {
+    if (!isFirebaseConfigured()) {
+      setSyncStatus("📴 Local only", "");
+      return;
+    }
+    setSyncStatus("🔄 Connecting…", "");
+    try {
+      const [{ initializeApp }, { getFirestore, doc, setDoc, onSnapshot }] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"),
+      ]);
+      firestoreApi = { doc, setDoc, onSnapshot };
+
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      firestoreReady = true;
+      const ref = doc(db, "households", "main");
+      onSnapshot(
+        ref,
+        (snap) => {
+          if (snap.exists()) {
+            applyRemoteState(snap.data());
+          } else {
+            setDoc(ref, getSharedState());
+          }
+          setSyncStatus("☁️ Synced", "status-synced");
+        },
+        (err) => {
+          console.error("Firestore sync error:", err);
+          setSyncStatus("⚠️ Sync error", "status-error");
+        }
+      );
+    } catch (err) {
+      console.error("Failed to initialize Firebase (running local-only):", err);
+      setSyncStatus("📴 Local only", "");
+    }
   }
 
   // ---------- Profiles & points ----------
@@ -182,6 +299,71 @@
     renderWhoSheet();
     whoSheetBackdrop.hidden = false;
   }
+
+  // ---------- Gousto tracker ----------
+  const goustoCard = document.getElementById("gousto-card");
+  const goustoStatusEl = document.getElementById("gousto-status");
+  const goustoActionsEl = document.getElementById("gousto-actions");
+  const goustoOrderedBtn = document.getElementById("gousto-ordered-btn");
+  const goustoSkipBtn = document.getElementById("gousto-skip-btn");
+  const goustoUndoBtn = document.getElementById("gousto-undo-btn");
+
+  function refreshGoustoWeek() {
+    const currentMonday = mondayOf(todayStr());
+    if (state.gousto.weekStart !== currentMonday) {
+      state.gousto = { weekStart: currentMonday, status: "pending" };
+      saveData();
+    }
+  }
+
+  function isGoustoUrgent() {
+    const dow = new Date().getDay(); // 0 Sun, 5 Fri, 6 Sat
+    return dow === 5 || dow === 6 || dow === 0;
+  }
+
+  function renderGousto() {
+    refreshGoustoWeek();
+    const { status } = state.gousto;
+    const urgent = status === "pending" && isGoustoUrgent();
+
+    goustoCard.className = `card gousto-card${
+      status === "ordered" ? " status-ordered" : status === "skipped" ? " status-skipped" : urgent ? " status-urgent" : ""
+    }`;
+
+    if (status === "ordered") {
+      goustoStatusEl.textContent = "✅ Ordered for this week — nice one.";
+    } else if (status === "skipped") {
+      goustoStatusEl.textContent = "⏭️ Skipped this week — no delivery needed.";
+    } else if (urgent) {
+      goustoStatusEl.textContent = "⚠️ Not ordered yet — order today, or it'll be too late for this week!";
+    } else {
+      goustoStatusEl.textContent = "Order by Saturday, or skip if you don't need a box this week.";
+    }
+
+    goustoActionsEl.hidden = status !== "pending";
+    goustoUndoBtn.hidden = status === "pending";
+  }
+
+  goustoOrderedBtn.addEventListener("click", () => {
+    state.gousto.status = "ordered";
+    saveData();
+    renderGousto();
+  });
+
+  goustoSkipBtn.addEventListener("click", () => {
+    state.gousto.status = "skipped";
+    saveData();
+    renderGousto();
+  });
+
+  goustoUndoBtn.addEventListener("click", () => {
+    state.gousto.status = "pending";
+    saveData();
+    renderGousto();
+  });
+
+  // Re-check hourly in case the tab is left open across a day boundary (Friday/Monday rollover)
+  setInterval(renderGousto, 60 * 60 * 1000);
 
   // ---------- Tabs ----------
   document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -458,7 +640,17 @@
   });
 
   // ---------- Init ----------
+  function renderAll() {
+    renderProfileBar();
+    renderShopping();
+    renderCounters();
+    renderImprovements();
+    renderGousto();
+  }
+
   renderShopping();
   renderCounters();
   renderImprovements();
+  renderGousto();
+  initFirebaseSync();
 })();
