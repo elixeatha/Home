@@ -460,6 +460,58 @@ button {
   margin: 0 auto;
 }
 
+.mice-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.mice-row .counter-grid-single {
+  flex-shrink: 0;
+}
+
+.mice-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.mice-leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mice-leaderboard-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+}
+
+.mice-leaderboard-avatar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mice-leaderboard-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.mice-leaderboard-count {
+  margin-left: auto;
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
 .counter-tile .tile-icon {
   font-size: 1.6rem;
   display: block;

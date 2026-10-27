@@ -4,7 +4,7 @@ import { firebaseConfig } from "./firebase-config.js";
   "use strict";
 
   const STORAGE_KEY = "ourhome-data-v1";
-  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto", "miceCaught"];
+  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto", "miceCaught", "miceByUser"];
 
   const PROFILES = {
     jennie: {
@@ -92,6 +92,10 @@ import { firebaseConfig } from "./firebase-config.js";
     }
     if (!PROFILE_IDS.includes(data.currentUser)) data.currentUser = null;
     if (typeof data.miceCaught !== "number") data.miceCaught = 0;
+    if (!data.miceByUser || typeof data.miceByUser !== "object") data.miceByUser = {};
+    for (const id of PROFILE_IDS) {
+      if (typeof data.miceByUser[id] !== "number") data.miceByUser[id] = 0;
+    }
     const currentMonday = mondayOf(todayStr());
     if (!data.gousto || typeof data.gousto !== "object" || data.gousto.weekStart !== currentMonday) {
       data.gousto = { weekStart: currentMonday, status: "pending" };
@@ -512,6 +516,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
   // ---------- Mice caught ----------
   const miceGrid = document.getElementById("mice-grid");
+  const miceLeaderboardEl = document.getElementById("mice-leaderboard");
   const mouseSheetBackdrop = document.getElementById("mouse-sheet-backdrop");
   const mouseSheetConfirmBtn = document.getElementById("mouse-sheet-confirm");
   const mouseSheetCancelBtn = document.getElementById("mouse-sheet-cancel");
@@ -530,6 +535,20 @@ import { firebaseConfig } from "./firebase-config.js";
       mouseSheetBackdrop.hidden = false;
     });
     miceGrid.appendChild(tile);
+
+    miceLeaderboardEl.innerHTML = "";
+    const ranked = [...PROFILE_IDS].sort((a, b) => state.miceByUser[b] - state.miceByUser[a]);
+    for (const id of ranked) {
+      const profile = PROFILES[id];
+      const row = document.createElement("div");
+      row.className = "mice-leaderboard-row";
+      row.innerHTML = `
+        <span class="mice-leaderboard-avatar">${profile.svg}</span>
+        <span class="mice-leaderboard-name">${profile.name}</span>
+        <span class="mice-leaderboard-count">${state.miceByUser[id]}</span>
+      `;
+      miceLeaderboardEl.appendChild(row);
+    }
   }
 
   function closeMouseSheet() {
@@ -538,6 +557,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
   mouseSheetConfirmBtn.addEventListener("click", () => {
     state.miceCaught += 1;
+    if (state.currentUser) state.miceByUser[state.currentUser] += 1;
     saveData();
     renderMice();
     if (state.currentUser) awardPoint(state.currentUser, 5);
