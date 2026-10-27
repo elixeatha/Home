@@ -51,6 +51,11 @@
           <div class="counter-grid" id="laundry-grid"></div>
         </section>
 
+        <section class="card">
+          <h2>Mice Caught</h2>
+          <div class="counter-grid counter-grid-single" id="mice-grid"></div>
+        </section>
+
       </section>
 
       <!-- HOME IMPROVEMENT TAB -->
@@ -77,6 +82,16 @@
       <p id="bin-sheet-sub" class="sheet-sub"></p>
       <button id="bin-sheet-empty" class="btn-primary">Empty bin</button>
       <button id="bin-sheet-cancel" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Mouse caught confirm sheet -->
+  <div id="mouse-sheet-backdrop" class="sheet-backdrop" hidden>
+    <div class="sheet">
+      <h3>🐭 Caught a mouse?</h3>
+      <p class="sheet-sub">This adds 1 to the count and gives you 5 points.</p>
+      <button id="mouse-sheet-confirm" class="btn-primary">Yes, caught one!</button>
+      <button id="mouse-sheet-cancel" class="btn-secondary">Cancel</button>
     </div>
   </div>
 

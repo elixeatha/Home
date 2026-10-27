@@ -449,6 +449,16 @@ button {
 
 .counter-tile.level-warn { background: var(--yellow); }
 .counter-tile.level-danger { background: var(--red); }
+.counter-tile.mouse-tile { background: var(--accent); }
+
+.counter-grid-single {
+  grid-template-columns: 1fr;
+}
+
+.counter-grid-single .counter-tile {
+  max-width: 200px;
+  margin: 0 auto;
+}
 
 .counter-tile .tile-icon {
   font-size: 1.6rem;
