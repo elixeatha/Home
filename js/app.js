@@ -4,7 +4,7 @@ import { firebaseConfig } from "./firebase-config.js";
   "use strict";
 
   const STORAGE_KEY = "ourhome-data-v1";
-  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto"];
+  const SHARED_KEYS = ["shopping", "improvements", "counters", "points", "gousto", "miceCaught"];
 
   const PROFILES = {
     jennie: {
@@ -91,6 +91,7 @@ import { firebaseConfig } from "./firebase-config.js";
       if (typeof data.points[id] !== "number") data.points[id] = 0;
     }
     if (!PROFILE_IDS.includes(data.currentUser)) data.currentUser = null;
+    if (typeof data.miceCaught !== "number") data.miceCaught = 0;
     const currentMonday = mondayOf(todayStr());
     if (!data.gousto || typeof data.gousto !== "object" || data.gousto.weekStart !== currentMonday) {
       data.gousto = { weekStart: currentMonday, status: "pending" };
@@ -272,9 +273,9 @@ import { firebaseConfig } from "./firebase-config.js";
     }
   }
 
-  function awardPoint(userId) {
+  function awardPoint(userId, amount = 1) {
     if (!PROFILE_IDS.includes(userId)) return;
-    state.points[userId] += 1;
+    state.points[userId] += amount;
     saveData();
     renderProfileBar();
 
@@ -285,7 +286,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
     const popup = document.createElement("span");
     popup.className = "point-popup";
-    popup.textContent = "+1";
+    popup.textContent = `+${amount}`;
     avatarWrap.appendChild(popup);
     popup.addEventListener("animationend", () => popup.remove());
 
@@ -480,8 +481,12 @@ import { firebaseConfig } from "./firebase-config.js";
   function openBinSheet(c) {
     activeCounterId = c.id;
     const count = daysSince(state.counters[c.id].lastEmptied);
+    const isLaundry = c.group === "laundry";
     sheetTitle.textContent = `${c.icon} ${c.label}`;
-    sheetSub.textContent = `${count} day${count === 1 ? "" : "s"} since it was last emptied.`;
+    sheetSub.textContent = isLaundry
+      ? `${count} day${count === 1 ? "" : "s"} since this wash was last done.`
+      : `${count} day${count === 1 ? "" : "s"} since it was last emptied.`;
+    sheetEmptyBtn.textContent = isLaundry ? "Washing done?" : "Empty bin";
     sheetBackdrop.hidden = false;
   }
 
@@ -503,6 +508,45 @@ import { firebaseConfig } from "./firebase-config.js";
   sheetCancelBtn.addEventListener("click", closeBinSheet);
   sheetBackdrop.addEventListener("click", (e) => {
     if (e.target === sheetBackdrop) closeBinSheet();
+  });
+
+  // ---------- Mice caught ----------
+  const miceGrid = document.getElementById("mice-grid");
+  const mouseSheetBackdrop = document.getElementById("mouse-sheet-backdrop");
+  const mouseSheetConfirmBtn = document.getElementById("mouse-sheet-confirm");
+  const mouseSheetCancelBtn = document.getElementById("mouse-sheet-cancel");
+
+  function renderMice() {
+    miceGrid.innerHTML = "";
+    const tile = document.createElement("div");
+    tile.className = "counter-tile mouse-tile";
+    tile.innerHTML = `
+      <span class="tile-icon">🐭</span>
+      <span class="tile-label">Mice Caught</span>
+      <div class="tile-count">${state.miceCaught}</div>
+      <span class="tile-sub">total caught</span>
+    `;
+    tile.addEventListener("click", () => {
+      mouseSheetBackdrop.hidden = false;
+    });
+    miceGrid.appendChild(tile);
+  }
+
+  function closeMouseSheet() {
+    mouseSheetBackdrop.hidden = true;
+  }
+
+  mouseSheetConfirmBtn.addEventListener("click", () => {
+    state.miceCaught += 1;
+    saveData();
+    renderMice();
+    if (state.currentUser) awardPoint(state.currentUser, 5);
+    closeMouseSheet();
+  });
+
+  mouseSheetCancelBtn.addEventListener("click", closeMouseSheet);
+  mouseSheetBackdrop.addEventListener("click", (e) => {
+    if (e.target === mouseSheetBackdrop) closeMouseSheet();
   });
 
   // ---------- Home Improvement ----------
@@ -648,11 +692,13 @@ import { firebaseConfig } from "./firebase-config.js";
     renderCounters();
     renderImprovements();
     renderGousto();
+    renderMice();
   }
 
   renderShopping();
   renderCounters();
   renderImprovements();
   renderGousto();
+  renderMice();
   initFirebaseSync();
 })();
