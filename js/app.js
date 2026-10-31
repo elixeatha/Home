@@ -45,10 +45,11 @@ import { firebaseConfig } from "./firebase-config.js";
   const PROFILE_IDS = Object.keys(PROFILES);
 
   const COUNTERS = [
-    { id: "binRecycling", group: "bins", icon: "♻️", label: "Recycling" },
-    { id: "binGeneral", group: "bins", icon: "🗑️", label: "General" },
-    { id: "laundryWhites", group: "laundry", icon: "🧺", label: "Whites" },
-    { id: "laundryColours", group: "laundry", icon: "🧦", label: "Colours" },
+    { id: "binRecycling", group: "bins", icon: "♻️", label: "Recycling", tileSub: "since empty" },
+    { id: "binGeneral", group: "bins", icon: "🗑️", label: "General", tileSub: "since empty" },
+    { id: "laundryWhites", group: "laundry", icon: "🧺", label: "Whites", tileSub: "since empty" },
+    { id: "laundryColours", group: "laundry", icon: "🧦", label: "Colours", tileSub: "since empty" },
+    { id: "bedSheets", group: "bed", icon: "🛏️", label: "Bed", tileSub: "since changed" },
   ];
 
   function todayStr() {
@@ -449,6 +450,8 @@ import { firebaseConfig } from "./firebase-config.js";
   // ---------- Counters (bins & laundry) ----------
   const binsGrid = document.getElementById("bins-grid");
   const laundryGrid = document.getElementById("laundry-grid");
+  const bedGrid = document.getElementById("bed-grid");
+  const GRIDS = { bins: binsGrid, laundry: laundryGrid, bed: bedGrid };
 
   function levelFor(count) {
     if (count >= 7) return "level-danger";
@@ -459,6 +462,7 @@ import { firebaseConfig } from "./firebase-config.js";
   function renderCounters() {
     binsGrid.innerHTML = "";
     laundryGrid.innerHTML = "";
+    bedGrid.innerHTML = "";
 
     for (const c of COUNTERS) {
       const count = daysSince(state.counters[c.id].lastEmptied);
@@ -468,10 +472,10 @@ import { firebaseConfig } from "./firebase-config.js";
         <span class="tile-icon">${c.icon}</span>
         <span class="tile-label">${c.label}</span>
         <div class="tile-count">${count}</div>
-        <span class="tile-sub">day${count === 1 ? "" : "s"} since empty</span>
+        <span class="tile-sub">day${count === 1 ? "" : "s"} ${c.tileSub}</span>
       `;
       tile.addEventListener("click", () => openBinSheet(c));
-      (c.group === "bins" ? binsGrid : laundryGrid).appendChild(tile);
+      GRIDS[c.group].appendChild(tile);
     }
   }
 
@@ -486,11 +490,18 @@ import { firebaseConfig } from "./firebase-config.js";
     activeCounterId = c.id;
     const count = daysSince(state.counters[c.id].lastEmptied);
     const isLaundry = c.group === "laundry";
+    const isBed = c.group === "bed";
     sheetTitle.textContent = `${c.icon} ${c.label}`;
-    sheetSub.textContent = isLaundry
-      ? `${count} day${count === 1 ? "" : "s"} since this wash was last done.`
-      : `${count} day${count === 1 ? "" : "s"} since it was last emptied.`;
-    sheetEmptyBtn.textContent = isLaundry ? "Washing done?" : "Empty bin";
+    if (isLaundry) {
+      sheetSub.textContent = `${count} day${count === 1 ? "" : "s"} since this wash was last done.`;
+      sheetEmptyBtn.textContent = "Washing done?";
+    } else if (isBed) {
+      sheetSub.textContent = `${count} day${count === 1 ? "" : "s"} since the sheets were last changed.`;
+      sheetEmptyBtn.textContent = "Sheets changed?";
+    } else {
+      sheetSub.textContent = `${count} day${count === 1 ? "" : "s"} since it was last emptied.`;
+      sheetEmptyBtn.textContent = "Empty bin";
+    }
     sheetBackdrop.hidden = false;
   }
 
