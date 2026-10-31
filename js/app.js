@@ -147,14 +147,30 @@ import { firebaseConfig } from "./firebase-config.js";
     return out;
   }
 
+  // Keys that are nested objects keyed by id (counter id, profile id) — these
+  // get merged field-by-field instead of wholesale-replaced, so that a remote
+  // snapshot saved before a new counter/profile existed doesn't wipe out the
+  // locally-initialized default for it.
+  const MERGE_KEYS = new Set(["counters", "points", "miceByUser"]);
+
   function applyRemoteState(data) {
     applyingRemote = true;
+    let backfillNeeded = false;
     for (const key of SHARED_KEYS) {
-      if (data[key] !== undefined) state[key] = data[key];
+      if (data[key] === undefined) continue;
+      if (MERGE_KEYS.has(key)) {
+        for (const subKey of Object.keys(state[key] || {})) {
+          if (data[key][subKey] === undefined) backfillNeeded = true;
+        }
+        state[key] = { ...state[key], ...data[key] };
+      } else {
+        state[key] = data[key];
+      }
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     renderAll();
     applyingRemote = false;
+    if (backfillNeeded) pushToDatabase();
   }
 
   function pushToDatabase() {
